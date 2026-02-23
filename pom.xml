@@ -28,9 +28,7 @@
         <archunit.version>1.4.1</archunit.version>
         <jacoco.version>0.8.14</jacoco.version>
 
-        <db.image>postgres:18.1</db.image>
-        <db.username>hrs</db.username>
-        <db.password>secret</db.password>
+        <db.url>jdbc:h2:${project.build.directory}/jooq-codegen-db</db.url>
     </properties>
 
     <dependencies>
@@ -46,10 +44,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -64,8 +58,14 @@
         </dependency>
 
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-h2console</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 
@@ -77,21 +77,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jooq-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers-postgresql</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -130,112 +115,64 @@
         <plugins>
             <!-- jOOQ Code Generation -->
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>groovy-maven-plugin</artifactId>
-                <version>${groovy-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <!-- Start the Testcontainer in the generate-sources phase -->
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>
-                                db = new org.testcontainers.postgresql.PostgreSQLContainer(project.properties.getProperty('db.image'))
-                                        .withUsername(project.properties.getProperty('db.username'))
-                                        .withPassword(project.properties.getProperty('db.password'))
-                                db.start()
-                                // After you've started the container, collect its generated
-                                // JDBC URL (which contains a random port)
-                                project.properties.setProperty('db.url', db.getJdbcUrl())
-                            </source>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.testcontainers</groupId>
-                        <artifactId>testcontainers</artifactId>
-                        <version>${testcontainers.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.testcontainers</groupId>
-                        <artifactId>testcontainers-postgresql</artifactId>
-                        <version>${testcontainers.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <!-- Run the migration in the same phase, before jOOQ's code generation -->
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>migrate</goal>
                         </goals>
-                        <configuration>
-                            <!-- This URL has been set by groovy, above -->
-                            <url>${db.url}</url>
-                            <user>${db.username}</user>
-                            <password>${db.password}</password>
-                            <locations>
-                                <location>
-                                    filesystem:src/main/resources/db/migration
-                                </location>
-                            </locations>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <url>${db.url}</url>
+                    <locations>
+                        <location>filesystem:src/main/resources/db/migration</location>
+                    </locations>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                        <version>${h2.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <version>${jooq.version}</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${postgresql.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>ch.martinelli.oss</groupId>
-                        <artifactId>jooq-utilities</artifactId>
-                        <version>${jooq-utilities.version}</version>
-                    </dependency>
-                </dependencies>
                 <executions>
                     <execution>
-                        <id>java-generator</id>
-                        <!-- Same phase as above, but the previous plugins have already executed, now generate the jOOQ code-->
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <jdbc>
-                                <driver>org.postgresql.Driver</driver>
-                                <!-- Again, this URL has been set by groovy, above -->
-                                <url>${db.url}</url>
-                                <user>${db.username}</user>
-                                <password>${db.password}</password>
-                            </jdbc>
-                            <generator>
-                                <database>
-                                    <inputSchema>public</inputSchema>
-                                    <excludes>flyway_schema_history</excludes>
-                                </database>
-                                <name>ch.martinelli.oss.jooq.EqualsAndHashCodeJavaGenerator</name>
-                                <target>
-                                    <packageName>ch.martinelli.edu.hrs.db</packageName>
-                                </target>
-                            </generator>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <jdbc>
+                        <url>${db.url}</url>
+                    </jdbc>
+                    <generator>
+                        <database>
+                            <name>org.jooq.meta.h2.H2Database</name>
+                            <includes>.*</includes>
+                            <excludes>flyway_schema_history</excludes>
+                            <inputSchema>PUBLIC</inputSchema>
+                        </database>
+                        <target>
+                            <packageName>ch.martinelli.edu.hrs.db</packageName>
+                        </target>
+                    </generator>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                        <version>${h2.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>com.vaadin</groupId>

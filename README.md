@@ -10,40 +10,31 @@ specifications.
 - **Vaadin 25** for the UI (Java-based views)
 - **jOOQ** for type-safe SQL and data access
 - **Flyway** for database migrations
-- **PostgreSQL 18** as the database
-- **Testcontainers** for database provisioning (dev and test)
+- **H2** as the database (embedded, no external setup required)
 - **Karibu Testing** for server-side UI unit tests
 - **Playwright** for browser-based integration tests
 
 ## Prerequisites
 
 - **Java 25** (or later)
-- **Docker** (required for Testcontainers to start a PostgreSQL container)
 - **Maven** (or use the included `mvnw` wrapper)
 
 ## Running the Application
 
-The application uses Testcontainers to automatically start a PostgreSQL database — no manual database setup required.
-Docker must be running.
-
-**Run `TestHrsApplication` (not `HrsApplication`):**
+The application uses an embedded H2 database — no Docker or external database setup required.
 
 ```bash
-./mvnw spring-boot:test-run
+./mvnw spring-boot:run
 ```
 
-Or run `TestHrsApplication.main()` directly from your IDE.
-
-This uses the `TestcontainersConfiguration` class which starts a PostgreSQL container and wires it as the datasource.
-Running the regular `HrsApplication` will fail unless you provide your own PostgreSQL instance.
+Or run `HrsApplication.main()` directly from your IDE.
 
 ## Build and Code Generation
 
-The Maven build uses a three-step pipeline during `generate-sources`:
+The Maven build uses a two-step pipeline during `generate-sources`:
 
-1. **Groovy script** starts a PostgreSQL Testcontainer and captures its JDBC URL
-2. **Flyway** runs database migrations against the container
-3. **jOOQ** generates type-safe Java code from the live database schema
+1. **Flyway** runs database migrations against a file-based H2 database
+2. **jOOQ** generates type-safe Java code from the H2 schema
 
 ```bash
 ./mvnw compile

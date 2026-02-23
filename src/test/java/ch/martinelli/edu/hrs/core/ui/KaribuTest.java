@@ -1,6 +1,5 @@
 package ch.martinelli.edu.hrs.core.ui;
 
-import ch.martinelli.edu.hrs.TestcontainersConfiguration;
 import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
 import com.github.mvysny.kaributesting.v10.spring.MockSpringServlet;
@@ -12,11 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.util.Locale;
 
-@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 public abstract class KaribuTest {
 
