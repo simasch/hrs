@@ -1,0 +1,80 @@
+@startuml UC-001 Search Available Rooms
+
+title UC-001 Search Available Rooms
+
+|Guest|
+start
+:Open public booking page;
+
+|System|
+:Display search form;
+
+|Guest|
+:Enter check-in date,
+check-out date,
+number of guests;
+:Submit search;
+
+|System|
+if (Check-in date today or later?) then (no)
+    :Show "Check-in must not be in the past";
+    |Guest|
+    :Correct dates;
+    note right: A1 Invalid Date Range
+    detach
+else (yes)
+endif
+
+if (Check-out after check-in?) then (no)
+    :Show "Check-out must be after check-in";
+    |Guest|
+    :Correct dates;
+    detach
+else (yes)
+endif
+
+|System|
+if (Stay <= 30 nights\nand within 365 days?) then (no)
+    :Show stay-length error;
+    note right: A3 Stay Exceeds Maximum
+    |Guest|
+    :Correct dates;
+    detach
+else (yes)
+endif
+
+|System|
+:Find rooms with capacity >= guests
+and no overlapping reservation;
+
+if (Any rooms found?) then (no)
+    :Show "No rooms available";
+    :Suggest adjusting dates or guest count;
+    |Guest|
+    if (Refine search?) then (yes)
+        :Update criteria;
+        note right: A4 Refine Search
+        detach
+    else (no)
+        stop
+    endif
+else (yes)
+endif
+
+|System|
+:Display available rooms
+with type, capacity,
+nightly rate, total price;
+
+|Guest|
+:Review results;
+
+if (Refine search?) then (yes)
+    :Update criteria;
+    detach
+else (no)
+endif
+
+stop
+
+@enduml
