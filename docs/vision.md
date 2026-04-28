@@ -1,4 +1,4 @@
-# Visiion
+# Vision
 
 We are the proud owners of a small, ten-room hotel.
 
