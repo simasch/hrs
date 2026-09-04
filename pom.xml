@@ -19,8 +19,6 @@
         <vaadin.version>25.2.6</vaadin.version>
         <jooq-utilities.version>1.1.4</jooq-utilities.version>
 
-        <flyway-maven-plugin.version>13.3.0</flyway-maven-plugin.version>
-
         <playwright.version>1.62.0</playwright.version>
         <mopo.version>0.0.6</mopo.version>
         <archunit.version>1.4.1</archunit.version>
@@ -119,7 +117,8 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway-maven-plugin.version}</version>
+                <!-- Keep the plugin in sync with the flyway-core version managed by Spring Boot -->
+                <version>${flyway.version}</version>
                 <executions>
                     <execution>
                         <!-- Run the migration against the file based H2 database, before jOOQ's code generation -->
