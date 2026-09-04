@@ -1,6 +1,5 @@
 package ch.martinelli.edu.hrs.core.ui;
 
-import ch.martinelli.edu.hrs.TestcontainersConfiguration;
 import com.microsoft.playwright.*;
 import in.virit.mopo.Mopo;
 import org.junit.jupiter.api.AfterAll;
@@ -9,9 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
 
-@Import(TestcontainersConfiguration.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class PlaywrightIT {
 
