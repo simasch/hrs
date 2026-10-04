@@ -6,7 +6,7 @@ specifications.
 
 ## Tech Stack
 
-- **Java 25** with **Spring Boot 4.0**
+- **Java 25** with **Spring Boot 4.1**
 - **Vaadin 25** for the UI (Java-based views)
 - **jOOQ** for type-safe SQL and data access
 - **Flyway** for database migrations
@@ -18,6 +18,9 @@ specifications.
 
 - **Java 25** (or later)
 - **Maven** (or use the included `mvnw` wrapper)
+
+Alternatively, open the repository in **GitHub Codespaces**. The `.devcontainer` sets up Java, Maven and Node,
+pre-installs the AIUP agent plugins and Playwright's Chromium, and creates a personal `workshop/<github-user>` branch.
 
 ## Running the Application
 
